@@ -1,4 +1,4 @@
-An example to demonstrate cooling of a homogenous slab.
+An example to demonstrate radiative collapse of a hydrodynamic fluid.
 
 Compiling:
 
