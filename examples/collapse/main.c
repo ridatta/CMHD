@@ -184,11 +184,11 @@ void initial_conditions(){
 		//~ }
 	//~ }
 	
-	//~ // Initial Conditions - Homgenous//
+	//~ // Initial Conditions - Collapse//
 	for (int i=0; i<nx; i++){
 		for (int j=0;j<ny;j++){
-				rho[j][i] = 1.0;
-				u[j][i] = 0.0 * sqrt(gamma*1.0/1.0);
+				rho[j][i] = 1.0 + 3.0 * exp(-1*pow(i*dx-0.5,2)/(2*pow(0.15,2)));;
+				u[j][i] = -0.0 * tanh((i*dx-0.5)/0.15);
 				v[j][i] = 0.0;
 				p[j][i] = 10.0;
 		}
@@ -253,7 +253,7 @@ double getMaxVelocity(double **u,double **v, double **p, double **rho){
 
 double getQrad(double density,double pressure){ // Radition Term Q = A * rho**alpha * T ** beta
 	if (irad == 1){
-		double A = -2.0;
+		double A = -0.1;
 		double alpha = 2.0, beta = 0.5;
 		double T;
 		T = pressure * 1.0 / density; // Temp 
@@ -459,6 +459,15 @@ int main(){
 		fprintf(fptr,"%f,%f\n",t,p[ny/2][nx/2]);
 		fclose(fptr);
 		
+		if (cntr == 1){
+			fptr = fopen("./output/rho_vs_t.txt", "w+");
+			}
+		else{
+			fptr = fopen("./output/rho_vs_t.txt", "a");
+		}
+		fprintf(fptr,"%f,%f\n",t,rho[ny/2][nx/2]);
+		fclose(fptr);
+		
 		//~ FILE *fptr;
 		//~ if (cntr == 1){
 			//~ fptr = fopen("./output/v_vs_t.txt", "w+"); // Total Energy vs Time
@@ -473,8 +482,8 @@ int main(){
 		if (cntr % noutput == 0){
 			printf("t = %f, step = %d , maxV = %f, dt = %f\n",t,cntr,maxV,dt);
 			char fname[50];
-			//~ sprintf(fname,"./output/u-%d.txt",cntr);
-			//~ writeOutput(u,fname);
+			sprintf(fname,"./output/u-%d.txt",cntr);
+			writeOutput(u,fname);
 			//~ sprintf(fname,"./output/v-%d.txt",cntr);
 			//~ writeOutput(v,fname);
 			sprintf(fname,"./output/p-%d.txt",cntr);
