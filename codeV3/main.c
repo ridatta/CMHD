@@ -277,7 +277,7 @@ int main(){
 		//~ fclose(fptr);
 		
 		
-		if (cntr % 100 == 0){
+		if (cntr % num_print == 0){
 			printf("t = %f, step = %d , maxV = %f, dt = %f\n",t,cntr,maxV,dt);
 			char fname[50];
 			sprintf(fname,"./output/u-%d.txt",cntr);

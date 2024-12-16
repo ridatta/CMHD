@@ -7,11 +7,16 @@ extern void initial_conditions(){
 	for (int i=0; i<nx; i++){
 		for (int j=0;j<ny;j++){
 				rho[j][i] = 1.0;
-				u[j][i] = 0.0 * sqrt(gamma*1.0/1.0);
+				if (i < nx*0.5){
+					u[j][i] = 2.5 * sqrt(gamma*1.0/1.0);
+				}
+					else {
+						u[j][i] = -2.5 * sqrt(gamma*1.0/1.0);
+					}
 				v[j][i] = 0.0;
-				p[j][i] = 10.0;
+				p[j][i] = 1.0;
 				Bx[j][i] = 0.0;
-				By[j][i] = 1.0 * tanh((i*dx-0.5)/0.25);
+				By[j][i] = 0.0 * tanh((i*dx-0.5)/0.25);
 		}
 	}
 
