@@ -162,8 +162,8 @@ int main(){
 							vn = (Up[1][j][i]/Up[0][j][i]) * bnx[j][i] + (Up[2][j][i]/Up[0][j][i]) * bny[j][i];
 							ub = (Up[1][j][i]/Up[0][j][i]) - 1.0 * vn * bnx[j][i];
 							vb = (Up[2][j][i]/Up[0][j][i]) - 1.0 * vn * bny[j][i];
-							Up[1][j][i] = Up[0][j][i] * ub; 
-							Up[2][j][i] = Up[0][j][i] * vb; 
+							Up[1][j][i] = Up[0][j][i] * ub * 1.0; // Velocity BC
+							Up[2][j][i] = Up[0][j][i] * vb * 1.0; 
 							Up[4][j][i] = 0.0;
 							Up[5][j][i] = 0.0;
 						
@@ -179,6 +179,12 @@ int main(){
 						+ nu * (U[idx][j][i+1] + U[idx][j][i-1] - 2*U[idx][j][i])
 						+ nu * (U[idx][j+1][i] + U[idx][j-1][i] - 2*U[idx][j][i])
 						+ S[idx]*dt);
+						//~ Up[idx][j][i] = (U[idx][j][i] 
+						//~ - 1.0*dt/dx * (Fx[idx][j][i+1]-Fx[idx][j][i]) // FDD
+						//~ - 1.0*dt/dx * (Fy[idx][j+1][i]-Fy[idx][j][i])
+						//~ + nu * (U[idx][j][i+1] + U[idx][j][i-1] - 2*U[idx][j][i])
+						//~ + nu * (U[idx][j+1][i] + U[idx][j-1][i] - 2*U[idx][j][i])
+						//~ + S[idx]*dt);
 					}
 				}
 			}
@@ -253,10 +259,10 @@ int main(){
 							U[0][j][i] = U[0][j+locj][i+loci];
 							U[3][j][i] = U[3][j+locj][i+loci];
 							vn = (U[1][j][i]/U[0][j][i]) * bnx[j][i] + (U[2][j][i]/U[0][j][i]) * bny[j][i];
-							ub = (U[1][j][i]/U[0][j][i]) - 1.0 * vn * bnx[j][i]; // No nornal velocity at wall
+							ub = (U[1][j][i]/U[0][j][i]) - 1.0 * vn * bnx[j][i]; // No normal velocity at wall
 							vb = (U[2][j][i]/U[0][j][i]) - 1.0 * vn * bny[j][i];
-							U[1][j][i] = U[0][j][i] * ub; 
-							U[2][j][i] = U[0][j][i] * vb; 
+							U[1][j][i] = U[0][j][i] * ub * 1.0;  // Velocity BC
+							U[2][j][i] = U[0][j][i] * vb * 1.0;  // Velocity BC
 							U[4][j][i] = 0.0;
 							U[5][j][i] = 0.0;
 						
@@ -271,6 +277,13 @@ int main(){
 						+nu*(Up[idx][j][i+1] + Up[idx][j][i-1] -2*Up[idx][j][i])
 						+nu*(Up[idx][j+1][i] + Up[idx][j-1][i] -2*Up[idx][j][i])
 						+0.5*S[idx]*dt);
+						//~ U[idx][j][i] = (0.5*(U[idx][j][i]+Up[idx][j][i])
+						//~ - 0.5*dt/dx * (Fxp[idx][j][i]-Fxp[idx][j][i-1]) //  BDD
+						//~ - 0.5*dt/dx * (Fyp[idx][j][i]-Fyp[idx][j-1][i])
+						//~ +nu*(Up[idx][j][i+1] + Up[idx][j][i-1] -2*Up[idx][j][i])
+						//~ +nu*(Up[idx][j+1][i] + Up[idx][j-1][i] -2*Up[idx][j][i])
+						//~ +0.5*S[idx]*dt);
+						
 					}
 				}
 			}
