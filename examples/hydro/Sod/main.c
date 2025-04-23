@@ -91,6 +91,8 @@ int main(){
 	
 	// Write output
 	writeOutput(internal_bound,"./output/bound-0.txt");
+	writeOutput(bnx,"./output/bnx-0.txt");
+	writeOutput(bny,"./output/bny-0.txt");
 	writeOutput(rho,"./output/rho-0.txt");
 	writeOutput(p,"./output/p-0.txt");
 	writeOutput(u,"./output/u-0.txt");
@@ -128,16 +130,43 @@ int main(){
 		}
 		
 		double temp = 0.0;
+		double vn = 0.0;
+		double ub = 0.0;
+		double vb = 0.0;
+		int locj = 1;
+		int loci = 1;
+		float thrs = 0.1;
+		
 		
 		// Predictor Step //
 		for (int idx=0; idx<nvar; idx++){
 			for (int j=1; j<(ny-1); j++){
 				for (int i=1; i<(nx-1); i++){
 					if (internal_bound[j][i] == 1.0){
-						Up[1][j][i] = 0.0; // If internal boundary set velocity to 0
-						Up[2][j][i] = 0.0;
-						Up[4][j][i] = 0.0;
-						Up[5][j][i] = 0.0;
+						
+							if (fabs(fabs(bny[j][i]) - fabs(bnx[j][i])) <= thrs){
+								locj = bny[j][i] / fabs(bny[j][i]);
+								loci = bnx[j][i] / fabs(bnx[j][i]);
+							}
+							else if (fabs(bny[j][i])>fabs(bnx[j][i])) {
+								locj = bny[j][i] / fabs(bny[j][i]);
+								loci = 0;	
+							}
+							else {
+								locj = 0;
+								loci = bnx[j][i] / fabs(bnx[j][i]);	
+							}
+							
+							Up[0][j][i] = Up[0][j+locj][i+loci];
+							Up[3][j][i] = Up[3][j+locj][i+loci];
+							vn = (Up[1][j][i]/Up[0][j][i]) * bnx[j][i] + (Up[2][j][i]/Up[0][j][i]) * bny[j][i];
+							ub = (Up[1][j][i]/Up[0][j][i]) - 1.0 * vn * bnx[j][i];
+							vb = (Up[2][j][i]/Up[0][j][i]) - 1.0 * vn * bny[j][i];
+							Up[1][j][i] = Up[0][j][i] * ub; 
+							Up[2][j][i] = Up[0][j][i] * vb; 
+							Up[4][j][i] = 0.0;
+							Up[5][j][i] = 0.0;
+						
 						
 					}
 					else {
@@ -145,8 +174,8 @@ int main(){
 						S[3] = getQrad(rho[j][i],p[j][i]); // Source term for energy eqn.
 						
 						Up[idx][j][i] = (U[idx][j][i] 
-						- dt/dx * (Fx[idx][j][i+1]-Fx[idx][j][i])
-						- dt/dx * (Fy[idx][j+1][i]-Fy[idx][j][i])
+						- 0.5*dt/dx * (Fx[idx][j][i+1]-Fx[idx][j][i-1]) // Using CDD was originally FDD
+						- 0.5*dt/dx * (Fy[idx][j+1][i]-Fy[idx][j-1][i])
 						+ nu * (U[idx][j][i+1] + U[idx][j][i-1] - 2*U[idx][j][i])
 						+ nu * (U[idx][j+1][i] + U[idx][j-1][i] - 2*U[idx][j][i])
 						+ S[idx]*dt);
@@ -205,18 +234,40 @@ int main(){
 			for (int j=1; j<(ny-1); j++){
 				for (int i=1; i<(nx-1); i++){
 					if (internal_bound[j][i] == 1.0){
-						U[1][j][i] = 0.0;
-						U[2][j][i] = 0.0;
-						U[4][j][i] = 0.0;
-						U[5][j][i] = 0.0;
+						
+							if (fabs(fabs(bny[j][i]) - fabs(bnx[j][i])) <= thrs){
+								locj = bny[j][i] / fabs(bny[j][i]);
+								loci = bnx[j][i] / fabs(bnx[j][i]);
+							}
+							else if (fabs(bny[j][i])>fabs(bnx[j][i])) {
+								locj = bny[j][i] / fabs(bny[j][i]);
+								loci = 0;	
+							}
+							else {
+								locj = 0;
+								loci = bnx[j][i] / fabs(bnx[j][i]);	
+							}
+							
+							 //~ printf("locj, loci = %d, %d \n",locj,loci);
+						
+							U[0][j][i] = U[0][j+locj][i+loci];
+							U[3][j][i] = U[3][j+locj][i+loci];
+							vn = (U[1][j][i]/U[0][j][i]) * bnx[j][i] + (U[2][j][i]/U[0][j][i]) * bny[j][i];
+							ub = (U[1][j][i]/U[0][j][i]) - 1.0 * vn * bnx[j][i]; // No nornal velocity at wall
+							vb = (U[2][j][i]/U[0][j][i]) - 1.0 * vn * bny[j][i];
+							U[1][j][i] = U[0][j][i] * ub; 
+							U[2][j][i] = U[0][j][i] * vb; 
+							U[4][j][i] = 0.0;
+							U[5][j][i] = 0.0;
+						
 					}
 					else{
 						S[2] = 0.0; // Source term for y-momentum
 						S[3] = getQrad(rho[j][i],p[j][i]); // Recalculate Raditaive cooling with upaded quantities
 						
 						U[idx][j][i] = (0.5*(U[idx][j][i]+Up[idx][j][i])
-						- 0.5*dt/dx * (Fxp[idx][j][i]-Fxp[idx][j][i-1])
-						- 0.5*dt/dx * (Fyp[idx][j][i]-Fyp[idx][j-1][i])
+						- 0.25*dt/dx * (Fxp[idx][j][i+1]-Fxp[idx][j][i-1]) // Using  CDD was originally BDD
+						- 0.25*dt/dx * (Fyp[idx][j+1][i]-Fyp[idx][j-1][i])
 						+nu*(Up[idx][j][i+1] + Up[idx][j][i-1] -2*Up[idx][j][i])
 						+nu*(Up[idx][j+1][i] + Up[idx][j-1][i] -2*Up[idx][j][i])
 						+0.5*S[idx]*dt);

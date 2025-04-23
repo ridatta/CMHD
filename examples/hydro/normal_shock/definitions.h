@@ -5,7 +5,7 @@
 
 double *S;
 double **rho, **u, **v, **p, **Bx, **By;
-double **internal_bound;
+double **internal_bound,**bnx,**bny;
 double ***U, ***Up, ***Fx, ***Fxp, ***Fy, ***Fyp;
 double dx = 1.0/(double)nx; // Grid space
 
@@ -24,6 +24,8 @@ extern void allocateArrays(){
     Bx = (double **)malloc(ny * sizeof(double *));
     By = (double **)malloc(ny * sizeof(double *));
     internal_bound = (double **)malloc(ny * sizeof(double *));
+    bnx = (double **)malloc(ny * sizeof(double *));
+    bny = (double **)malloc(ny * sizeof(double *));
 
     for (int i = 0; i < ny; i++) {
         rho[i] = (double *)malloc(nx * sizeof(double));
@@ -33,6 +35,8 @@ extern void allocateArrays(){
         Bx[i] = (double *)malloc(nx * sizeof(double));
         By[i] = (double *)malloc(nx * sizeof(double));
         internal_bound[i] = (double *)malloc(nx * sizeof(double));
+        bnx[i] = (double *)malloc(nx * sizeof(double));
+        bny[i] = (double *)malloc(nx * sizeof(double));
     }
 
     // Allocate memory for 3D arrays (6 x ny x nx)
@@ -75,6 +79,8 @@ extern void freeMemory(){
         free(Bx[i]);
         free(By[i]);
         free(internal_bound[i]);
+        free(bnx[i]);
+        free(bny[i]);
     }
 
     free(rho);
@@ -84,6 +90,8 @@ extern void freeMemory(){
     free(Bx);
     free(By);
     free(internal_bound);
+    free(bnx);
+    free(bny);
 
     for (int idx = 0; idx < nvar; idx++) {
         for (int i = 0; i < ny; i++) {
